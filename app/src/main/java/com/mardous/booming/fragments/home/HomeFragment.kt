@@ -103,23 +103,24 @@ class HomeFragment : AbsMainActivityFragment(R.layout.fragment_home),
         }
     }
 
+    private var lastSessionId: Int = -1
+
     private fun setupVisualizer() {
-        var lastSessionId = -1
         lifecycleScope.launch {
             playerViewModel.progressFlow.collectLatest {
                 val audioSessionId = playerViewModel.audioSessionId
                 Log.d("VisualizerDebug", "Collected progressFlow. audioSessionId: $audioSessionId, visualizer: $visualizer, isAdded: $isAdded, isResumed: $isResumed")
                 if (audioSessionId > 0 && visualizer != null && isAdded && isResumed) {
-                    try {
-                        visualizer?.release() // Release previous visualizer if any
-                        visualizer?.setPlayer(audioSessionId)
-                        Log.d("VisualizerDebug", "Visualizer set with sessionId: $audioSessionId")
-                        if (audioSessionId != lastSessionId) {
+                    if (audioSessionId != lastSessionId) {
+                        try {
+                            visualizer?.release()
+                            visualizer?.setPlayer(audioSessionId)
+                            Log.d("VisualizerDebug", "Visualizer set with sessionId: $audioSessionId")
                             Toast.makeText(requireContext(), "Visualizer set with sessionId: $audioSessionId", Toast.LENGTH_SHORT).show()
                             lastSessionId = audioSessionId
+                        } catch (e: Exception) {
+                            Log.e("VisualizerDebug", "Error setting visualizer: ${e.message}", e)
                         }
-                    } catch (e: Exception) {
-                        Log.e("VisualizerDebug", "Error setting visualizer: ${e.message}", e)
                     }
                 } else {
                     Log.w("VisualizerDebug", "audioSessionId not valid or visualizer not ready. audioSessionId: $audioSessionId, visualizer: $visualizer, isAdded: $isAdded, isResumed: $isResumed")
@@ -263,6 +264,11 @@ class HomeFragment : AbsMainActivityFragment(R.layout.fragment_home),
         super.onResume()
         checkForMargins()
         setupMediaController()
+        if (hasRecordAudioPermission()) {
+            // Reset lastSessionId so visualizer can be re-initialized if needed
+            lastSessionId = -1
+            setupVisualizer()
+        }
     }
 
     override fun onPause() {
