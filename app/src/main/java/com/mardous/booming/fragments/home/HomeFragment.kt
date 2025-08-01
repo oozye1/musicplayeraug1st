@@ -31,7 +31,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.chibde.BaseVisualizer
 import com.chibde.visualizer.BarVisualizer
+import com.chibde.visualizer.CircleBarVisualizer
+import com.chibde.visualizer.CircleVisualizer
+import com.chibde.visualizer.LineBarVisualizer
+import com.chibde.visualizer.LineVisualizer
+import com.chibde.visualizer.SquareBarVisualizer
 import com.mardous.booming.R
 import com.mardous.booming.adapters.HomeAdapter
 import com.mardous.booming.adapters.album.AlbumAdapter
@@ -60,6 +66,8 @@ import android.support.v4.media.session.PlaybackStateCompat
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import android.content.pm.PackageManager
+import android.widget.FrameLayout
+import android.widget.ImageButton
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
@@ -78,8 +86,20 @@ class HomeFragment : AbsMainActivityFragment(R.layout.fragment_home),
     private val binding get() = _binding!!
 
     private var homeAdapter: HomeAdapter? = null
-    private var visualizer: BarVisualizer? = null
+    private var visualizer: BaseVisualizer? = null
+    private var visualizerContainer: FrameLayout? = null
+    private var cycleVisualizerButton: ImageButton? = null
     private var mediaControllerCallback: MediaController.Callback? = null
+
+    private val visualizerClasses = listOf(
+        BarVisualizer::class.java,
+        CircleBarVisualizer::class.java,
+        CircleVisualizer::class.java,
+        LineBarVisualizer::class.java,
+        LineVisualizer::class.java,
+        SquareBarVisualizer::class.java
+    )
+    private var currentVisualizerIndex = 0
 
     private val currentContent: SuggestedResult
         get() = libraryViewModel.getSuggestions().value ?: SuggestedResult.Idle
@@ -97,35 +117,24 @@ class HomeFragment : AbsMainActivityFragment(R.layout.fragment_home),
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == RECORD_AUDIO_REQUEST_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            setupVisualizer()
+            loadVisualizer()
         } else {
             Toast.makeText(requireContext(), "RECORD_AUDIO permission is required for the visualizer", Toast.LENGTH_LONG).show()
         }
     }
 
-    private var lastSessionId: Int = -1
-
     private fun setupVisualizer() {
-        lifecycleScope.launch {
-            playerViewModel.progressFlow.collectLatest {
-                val audioSessionId = playerViewModel.audioSessionId
-                Log.d("VisualizerDebug", "Collected progressFlow. audioSessionId: $audioSessionId, visualizer: $visualizer, isAdded: $isAdded, isResumed: $isResumed")
-                if (audioSessionId > 0 && visualizer != null && isAdded && isResumed) {
-                    if (audioSessionId != lastSessionId) {
-                        try {
-                            visualizer?.release()
-                            visualizer?.setPlayer(audioSessionId)
-                            Log.d("VisualizerDebug", "Visualizer set with sessionId: $audioSessionId")
-                            Toast.makeText(requireContext(), "Visualizer set with sessionId: $audioSessionId", Toast.LENGTH_SHORT).show()
-                            lastSessionId = audioSessionId
-                        } catch (e: Exception) {
-                            Log.e("VisualizerDebug", "Error setting visualizer: ${e.message}", e)
-                        }
-                    }
-                } else {
-                    Log.w("VisualizerDebug", "audioSessionId not valid or visualizer not ready. audioSessionId: $audioSessionId, visualizer: $visualizer, isAdded: $isAdded, isResumed: $isResumed")
-                }
+        val audioSessionId = playerViewModel.audioSessionId
+        Log.d("VisualizerDebug", "Setup visualizer. audioSessionId: $audioSessionId, visualizer: $visualizer, isAdded: $isAdded, isResumed: $isResumed")
+        if (audioSessionId > 0 && visualizer != null && isAdded && isResumed) {
+            try {
+                visualizer?.setPlayer(audioSessionId)
+                Log.d("VisualizerDebug", "Visualizer set with sessionId: $audioSessionId")
+            } catch (e: Exception) {
+                Log.e("VisualizerDebug", "Error setting visualizer: ${e.message}", e)
             }
+        } else {
+            Log.w("VisualizerDebug", "audioSessionId not valid or visualizer not ready. audioSessionId: $audioSessionId, visualizer: $visualizer, isAdded: $isAdded, isResumed: $isResumed")
         }
     }
 
@@ -139,13 +148,22 @@ class HomeFragment : AbsMainActivityFragment(R.layout.fragment_home),
         val adView = view.findViewById<com.google.android.gms.ads.AdView>(R.id.adView)
         adView?.loadAd(adRequest)
 
-        visualizer = view.findViewById(R.id.visualizer)
-        Log.d("VisualizerDebug", "Visualizer instance: $visualizer")
+        visualizerContainer = view.findViewById(R.id.visualizer_container)
+        cycleVisualizerButton = view.findViewById(R.id.cycle_visualizer_button)
+        cycleVisualizerButton?.setOnClickListener {
+            cycleVisualizer()
+        }
 
         if (hasRecordAudioPermission()) {
-            setupVisualizer()
+            loadVisualizer()
         } else {
             requestRecordAudioPermission()
+        }
+
+        lifecycleScope.launch {
+            playerViewModel.progressFlow.collectLatest {
+                setupVisualizer()
+            }
         }
 
         // Fallback: Listen for playback state changes and retry setting sessionId if not valid
@@ -158,7 +176,6 @@ class HomeFragment : AbsMainActivityFragment(R.layout.fragment_home),
                         try {
                             visualizer?.setPlayer(sessionId)
                             Log.d("VisualizerDebug", "Visualizer set with sessionId (fallback): $sessionId")
-                            Toast.makeText(requireContext(), "Visualizer set (fallback): $sessionId", Toast.LENGTH_SHORT).show()
                         } catch (e: Exception) {
                             Log.e("VisualizerDebug", "Error setting visualizer (fallback): ${e.message}")
                         }
@@ -206,6 +223,29 @@ class HomeFragment : AbsMainActivityFragment(R.layout.fragment_home),
         }
 
         applyWindowInsetsFromView(view)
+    }
+
+    private fun cycleVisualizer() {
+        currentVisualizerIndex = (currentVisualizerIndex + 1) % visualizerClasses.size
+        loadVisualizer()
+    }
+
+    private fun loadVisualizer() {
+        visualizer?.release()
+        visualizerContainer?.removeAllViews()
+
+        try {
+            val visualizerClass = visualizerClasses[currentVisualizerIndex]
+            visualizer = visualizerClass.getConstructor(android.content.Context::class.java).newInstance(requireContext())
+            visualizer?.layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+            visualizerContainer?.addView(visualizer)
+            setupVisualizer()
+        } catch (e: Exception) {
+            Log.e("VisualizerDebug", "Error loading visualizer", e)
+        }
     }
 
     private val adapterDataObserver = object : RecyclerView.AdapterDataObserver() {
@@ -265,9 +305,7 @@ class HomeFragment : AbsMainActivityFragment(R.layout.fragment_home),
         checkForMargins()
         setupMediaController()
         if (hasRecordAudioPermission()) {
-            // Reset lastSessionId so visualizer can be re-initialized if needed
-            lastSessionId = -1
-            setupVisualizer()
+            loadVisualizer()
         }
     }
 
@@ -286,6 +324,8 @@ class HomeFragment : AbsMainActivityFragment(R.layout.fragment_home),
         homeAdapter = null
         visualizer?.release()
         visualizer = null
+        visualizerContainer = null
+        cycleVisualizerButton = null
         _binding = null
     }
 
@@ -394,6 +434,7 @@ class HomeFragment : AbsMainActivityFragment(R.layout.fragment_home),
         mediaControllerCallback = object : MediaController.Callback() {
             override fun onPlaybackStateChanged(state: android.media.session.PlaybackState?) {
                 super.onPlaybackStateChanged(state)
+                setupVisualizer()
             }
         }
         mediaControllerCallback?.let { mainActivity.mediaController?.registerCallback(it) }

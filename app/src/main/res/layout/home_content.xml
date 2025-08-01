@@ -18,15 +18,25 @@
         ads:adSize="BANNER"
         ads:adUnitId="ca-app-pub-3940256099942544/6300978111"/>
 
-    <com.chibde.visualizer.BarVisualizer
-        android:id="@+id/visualizer"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:background="#FF0000"
-        app:av_color="@android:color/holo_red_dark"
-        app:av_density="1"
-        app:av_num_bars="20"
-        app:av_type="bar" />
+        android:layout_height="100dp">
+
+        <FrameLayout
+            android:id="@+id/visualizer_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <ImageButton
+            android:id="@+id/cycle_visualizer_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|top"
+            android:layout_margin="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_cycle"
+            android:contentDescription="@string/cycle_visualizer" />
+    </FrameLayout>
 
     <include
         android:id="@+id/abs_playlists"

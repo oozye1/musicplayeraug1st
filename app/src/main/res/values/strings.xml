@@ -843,4 +843,5 @@
     <string name="uncaught_error_restart_app">Restart app</string>
     <string name="uncaught_error_github">Open issue on GitHub</string>
     <string name="uncaught_error_send">Send report</string>
+    <string name="cycle_visualizer">Cycle visualizer</string>
 </resources>
