@@ -168,6 +168,7 @@ class MusicService : MediaBrowserServiceCompat(), PlaybackCallbacks, QueueObserv
     private val currentPosition get() = queueManager.position
 
     val currentSong get() = queueManager.currentSong
+    val audioSessionId get() = playbackManager.getAudioSessionId()
 
     override fun onCreate() {
         super.onCreate()
@@ -1184,6 +1185,7 @@ class MusicService : MediaBrowserServiceCompat(), PlaybackCallbacks, QueueObserv
                         val album = repository.albumById(itemId)
                         songs.addAll(album.songs)
                         openQueue(songs, 0, true)
+
                     }
 
                     AutoMediaIDHelper.MEDIA_ID_MUSICS_BY_ARTIST -> {

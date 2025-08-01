@@ -12,6 +12,7 @@ plugins {
 }
 
 dependencies {
+    implementation(project(mapOf("path" to ":audiovisualizer")))
     implementation("com.google.android.gms:play-services-ads:22.6.0")
 }
 

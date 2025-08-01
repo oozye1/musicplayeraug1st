@@ -17,6 +17,7 @@
 
 package com.mardous.booming.fragments.home
 
+import android.media.session.MediaController
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
@@ -27,6 +28,7 @@ import androidx.core.view.updatePadding
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.chibde.visualizer.BarVisualizer
 import com.mardous.booming.R
 import com.mardous.booming.adapters.HomeAdapter
 import com.mardous.booming.adapters.album.AlbumAdapter
@@ -51,6 +53,7 @@ import com.mardous.booming.viewmodels.library.ReloadType
 import com.mardous.booming.viewmodels.library.model.SuggestedResult
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
+import android.support.v4.media.session.PlaybackStateCompat
 
 /**
  * @author Christians M. A. (mardous)
@@ -67,6 +70,8 @@ class HomeFragment : AbsMainActivityFragment(R.layout.fragment_home),
     private val binding get() = _binding!!
 
     private var homeAdapter: HomeAdapter? = null
+    private var visualizer: BarVisualizer? = null
+    private var mediaControllerCallback: MediaController.Callback? = null
 
     private val currentContent: SuggestedResult
         get() = libraryViewModel.getSuggestions().value ?: SuggestedResult.Idle
@@ -80,6 +85,8 @@ class HomeFragment : AbsMainActivityFragment(R.layout.fragment_home),
         val adRequest = AdRequest.Builder().build()
         val adView = view.findViewById<com.google.android.gms.ads.AdView>(R.id.adView)
         adView?.loadAd(adRequest)
+
+        visualizer = view.findViewById(R.id.visualizer)
 
         binding.appBarLayout.setupStatusBarForeground()
         setSupportActionBar(binding.toolbar)
@@ -176,11 +183,13 @@ class HomeFragment : AbsMainActivityFragment(R.layout.fragment_home),
     override fun onResume() {
         super.onResume()
         checkForMargins()
+        setupMediaController()
     }
 
     override fun onPause() {
         super.onPause()
         binding.recyclerView.stopScroll()
+        mediaControllerCallback?.let { mainActivity.mediaController?.unregisterCallback(it) }
     }
 
     override fun onDestroyView() {
@@ -189,6 +198,8 @@ class HomeFragment : AbsMainActivityFragment(R.layout.fragment_home),
         binding.recyclerView.adapter = null
         binding.recyclerView.layoutManager = null
         homeAdapter = null
+        visualizer?.release()
+        visualizer = null
         _binding = null
     }
 
@@ -291,6 +302,15 @@ class HomeFragment : AbsMainActivityFragment(R.layout.fragment_home),
 
     override fun artistsMenuItemClick(artists: List<Artist>, menuItem: MenuItem) {
         artists.onArtistsMenu(this, menuItem)
+    }
+
+    private fun setupMediaController() {
+        mediaControllerCallback = object : MediaController.Callback() {
+            override fun onPlaybackStateChanged(state: android.media.session.PlaybackState?) {
+                super.onPlaybackStateChanged(state)
+            }
+        }
+        mediaControllerCallback?.let { mainActivity.mediaController?.registerCallback(it) }
     }
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {

@@ -1,0 +1,12 @@
+<resources>
+    <declare-styleable name="AudioVisualizerView">
+        <attr name="av_num_bars" format="integer" />
+        <attr name="av_color" format="color" />
+        <attr name="av_type" format="enum">
+            <enum name="bar" value="0" />
+            <enum name="circle" value="1" />
+        </attr>
+        <attr name="av_density" format="integer" />
+    </declare-styleable>
+</resources>
+

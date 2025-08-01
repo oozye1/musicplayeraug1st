@@ -83,7 +83,9 @@ class PlaybackManager(
         }
     }
 
-    fun getAudioSessionId(): Int = playback?.getAudioSessionId() ?: AudioEffect.ERROR_BAD_VALUE
+    fun getAudioSessionId(): Int {
+        return playback?.getAudioSessionId() ?: AudioEffect.ERROR_BAD_VALUE
+    }
 
     fun getPlaybackSpeed(): Float = playback?.getSpeed() ?: 1f
 

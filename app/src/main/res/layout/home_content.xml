@@ -18,6 +18,15 @@
         ads:adSize="BANNER"
         ads:adUnitId="ca-app-pub-3940256099942544/6300978111"/>
 
+    <com.chibde.visualizer.BarVisualizer
+        android:id="@+id/visualizer"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        app:av_color="@color/md_theme_primary"
+        app:av_density="1"
+        app:av_num_bars="20"
+        app:av_type="bar" />
+
     <include
         android:id="@+id/abs_playlists"
         layout="@layout/abs_playlists"/>
