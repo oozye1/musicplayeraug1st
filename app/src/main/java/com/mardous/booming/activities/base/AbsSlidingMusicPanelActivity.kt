@@ -591,6 +591,7 @@ abstract class AbsSlidingMusicPanelActivity : AbsBaseActivity(),
         }
     }
 
+
     companion object {
         private const val BOTTOM_SHEET_HIDDEN = "is_bottom_sheet_hidden"
     }
