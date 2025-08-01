@@ -11,6 +11,10 @@ plugins {
     alias(libs.plugins.aboutlibraries)
 }
 
+dependencies {
+    implementation("com.google.android.gms:play-services-ads:22.6.0")
+}
+
 sealed class Version(
     private val versionOffset: Long,
     private val versionMajor: Int,

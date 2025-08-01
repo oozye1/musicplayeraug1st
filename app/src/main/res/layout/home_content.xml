@@ -10,6 +10,14 @@
     android:focusableInTouchMode="true"
     android:orientation="vertical">
 
+    <com.google.android.gms.ads.AdView
+        xmlns:ads="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/adView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        ads:adSize="BANNER"
+        ads:adUnitId="ca-app-pub-3940256099942544/6300978111"/>
+
     <include
         android:id="@+id/abs_playlists"
         layout="@layout/abs_playlists"/>
@@ -22,13 +30,13 @@
             android:id="@+id/recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:clipToPadding="false"
             android:nestedScrollingEnabled="false"
             android:overScrollMode="@integer/overScrollMode"
-            android:clipToPadding="false"
             android:scrollbars="none"
             android:transitionGroup="true"
             tools:itemCount="4"
-            tools:listitem="@layout/item_suggestion"/>
+            tools:listitem="@layout/item_suggestion" />
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/progressIndicator"

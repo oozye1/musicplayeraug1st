@@ -49,6 +49,8 @@ import com.mardous.booming.interfaces.*
 import com.mardous.booming.model.*
 import com.mardous.booming.viewmodels.library.ReloadType
 import com.mardous.booming.viewmodels.library.model.SuggestedResult
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.MobileAds
 
 /**
  * @author Christians M. A. (mardous)
@@ -73,6 +75,12 @@ class HomeFragment : AbsMainActivityFragment(R.layout.fragment_home),
         super.onViewCreated(view, savedInstanceState)
         val homeBinding = FragmentHomeBinding.bind(view)
         _binding = HomeBinding(homeBinding)
+
+        MobileAds.initialize(requireContext()) {}
+        val adRequest = AdRequest.Builder().build()
+        val adView = view.findViewById<com.google.android.gms.ads.AdView>(R.id.adView)
+        adView?.loadAd(adRequest)
+
         binding.appBarLayout.setupStatusBarForeground()
         setSupportActionBar(binding.toolbar)
         topLevelTransition(view)
