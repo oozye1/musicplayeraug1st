@@ -32,6 +32,12 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.chibde.visualizer.BarVisualizer
+import com.chibde.visualizer.LineBarVisualizer
+import com.chibde.visualizer.CircleBarVisualizer
+import com.chibde.visualizer.CircleBarVisualizerSmooth
+import com.chibde.visualizer.SquareBarVisualizer
+import android.widget.ImageButton
+import android.view.ViewGroup
 import com.mardous.booming.R
 import com.mardous.booming.adapters.HomeAdapter
 import com.mardous.booming.adapters.album.AlbumAdapter
@@ -205,6 +211,8 @@ class HomeFragment : AbsMainActivityFragment(R.layout.fragment_home),
             }
         }
 
+        setupVisualizerSwitcher()
+
         applyWindowInsetsFromView(view)
     }
 
@@ -260,6 +268,42 @@ class HomeFragment : AbsMainActivityFragment(R.layout.fragment_home),
         }
     }
 
+    private val visualizerTypes = listOf(
+        BarVisualizer::class.java,
+        LineBarVisualizer::class.java,
+        CircleBarVisualizer::class.java,
+        CircleBarVisualizerSmooth::class.java,
+        SquareBarVisualizer::class.java
+    )
+    private var currentVisualizerIndex = 0
+    private var visualizerView: View? = null
+
+    private fun setupVisualizerSwitcher() {
+        val container = (binding.visualizer.parent as ViewGroup)
+        visualizerView = binding.visualizer
+        binding.btnCycleVisualizer.setOnClickListener {
+            val audioSessionId = playerViewModel.audioSessionId
+            // Remove current visualizer
+            container.removeView(visualizerView)
+            // Cycle to next visualizer type
+            currentVisualizerIndex = (currentVisualizerIndex + 1) % visualizerTypes.size
+            val clazz = visualizerTypes[currentVisualizerIndex]
+            val newVisualizer = clazz.getConstructor(android.content.Context::class.java).newInstance(requireContext())
+            newVisualizer.id = R.id.visualizer
+            newVisualizer.layoutParams = binding.visualizer.layoutParams
+            container.addView(newVisualizer, container.indexOfChild(binding.btnCycleVisualizer) + 1)
+            visualizerView = newVisualizer
+            visualizer = newVisualizer as BarVisualizer // For compatibility with rest of code
+            lastSessionId = -1 // Force re-attach
+            setupVisualizer()
+        }
+    }
+
+    private fun releaseVisualizer() {
+        visualizer?.release()
+        visualizer = null
+    }
+
     override fun onResume() {
         super.onResume()
         checkForMargins()
@@ -284,8 +328,7 @@ class HomeFragment : AbsMainActivityFragment(R.layout.fragment_home),
         binding.recyclerView.adapter = null
         binding.recyclerView.layoutManager = null
         homeAdapter = null
-        visualizer?.release()
-        visualizer = null
+        releaseVisualizer()
         _binding = null
     }
 

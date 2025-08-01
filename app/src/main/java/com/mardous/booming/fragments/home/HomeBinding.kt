@@ -31,4 +31,6 @@ class HomeBinding(homeBinding: FragmentHomeBinding) {
     val recyclerView = homeBinding.homeContent.recyclerView
     val progressIndicator = homeBinding.homeContent.progressIndicator
     val empty = homeBinding.homeContent.empty
+    val btnCycleVisualizer = homeBinding.homeContent.findViewById<android.widget.ImageButton>(R.id.btn_cycle_visualizer)
+    val visualizer = homeBinding.homeContent.visualizer
 }

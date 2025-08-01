@@ -18,6 +18,17 @@
         ads:adSize="BANNER"
         ads:adUnitId="ca-app-pub-3940256099942544/6300978111"/>
 
+    <ImageButton
+        android:id="@+id/btn_cycle_visualizer"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="end|top"
+        android:layout_margin="8dp"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/cycle_visualizer"
+        android:src="@android:drawable/ic_menu_rotate"
+        android:tint="@android:color/white" />
+
     <com.chibde.visualizer.BarVisualizer
         android:id="@+id/visualizer"
         android:layout_width="match_parent"
