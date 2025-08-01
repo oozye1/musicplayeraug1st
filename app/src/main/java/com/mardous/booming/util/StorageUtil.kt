@@ -24,7 +24,7 @@ import android.os.storage.StorageVolume
 import android.util.Log
 import androidx.core.content.getSystemService
 import com.mardous.booming.R
-import com.mardous.booming.appContext
+import com.mardous.booming.extensions.appContext
 import com.mardous.booming.extensions.hasR
 import com.mardous.booming.model.filesystem.StorageDevice
 import kotlinx.io.IOException
@@ -45,7 +45,7 @@ object StorageUtil {
     fun refreshStorageVolumes(): List<StorageDevice> {
         _storageVolumes.clear()
         try {
-            val context = appContext()
+            val context = appContext
             val storageManager = context.getSystemService<StorageManager>()
                 ?: return emptyList()
 
@@ -92,5 +92,22 @@ object StorageUtil {
         } else {
             StorageVolume::class.java.getDeclaredMethod("getPath").invoke(this) as String
         }
+    }
+
+    private fun fromStorageVolume(storageVolume: StorageVolume): StorageDevice {
+        val context = appContext
+        val name = storageVolume.getDescription(context)
+            ?: context.getString(R.string.internal_storage_title)
+        val isPrimary = storageVolume.isPrimary
+        val isRemovable = storageVolume.isRemovable
+        val path = storageVolume.getPathCompat()
+
+        val icon = when {
+            isPrimary -> R.drawable.ic_phone_android_24dp
+            isRemovable -> R.drawable.ic_sd_card_24dp
+            else -> R.drawable.ic_folder_24dp
+        }
+
+        return StorageDevice(path, name, icon)
     }
 }

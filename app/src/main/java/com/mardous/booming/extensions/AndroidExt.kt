@@ -21,9 +21,12 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.ResolveInfoFlags
 import android.media.MediaPlayer
+import android.media.audiofx.AudioEffect
 import android.os.Build
 import androidx.core.text.HtmlCompat
-import com.mardous.booming.appContext
+import com.mardous.booming.extensions.appContext
+
+val fileProviderAuthority = "${appContext.packageName}.provider"
 
 fun hasPie() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
 
@@ -37,7 +40,19 @@ fun hasT() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
 
 fun hasU() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
 
-fun PackageManager.packageInfo(packageName: String = appContext().packageName) =
+val audioEffects: List<String>
+    get() {
+        val effects = Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL)
+        val packageManager = appContext.packageManager
+        val resolveInfoList = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            packageManager.queryIntentActivities(effects, PackageManager.ResolveInfoFlags.of(0))
+        } else {
+            packageManager.queryIntentActivities(effects, 0)
+        }
+        return resolveInfoList?.map { it.activityInfo.packageName } ?: emptyList()
+    }
+
+fun PackageManager.packageInfo(packageName: String = appContext.packageName) =
     runCatching {
         if (hasT()) getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(0))
         else getPackageInfo(packageName, 0)

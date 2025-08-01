@@ -60,6 +60,16 @@ import com.mardous.booming.search.SearchQuery
 import com.mardous.booming.util.*
 import com.mardous.booming.viewmodels.library.LibraryViewModel
 import com.mardous.booming.viewmodels.player.PlayerViewModel
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.MobileAds
+import com.chibde.visualizer.BarVisualizer
+import com.chibde.BaseVisualizer
+import com.chibde.visualizer.CircleBarVisualizer
+import com.chibde.visualizer.CircleVisualizer
+import com.chibde.visualizer.LineBarVisualizer
+import com.chibde.visualizer.LineVisualizer
+import com.chibde.visualizer.SquareBarVisualizer
+import android.content.Context
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 /**
@@ -72,6 +82,18 @@ abstract class AbsSlidingMusicPanelActivity : AbsBaseActivity(),
 
     protected val libraryViewModel: LibraryViewModel by viewModel()
     protected val playerViewModel: PlayerViewModel by viewModel()
+
+    private val visualizers = mutableMapOf<Class<out BaseVisualizer>, BaseVisualizer>()
+    private val visualizerClasses = listOf(
+        BarVisualizer::class.java,
+        CircleBarVisualizer::class.java,
+        CircleVisualizer::class.java,
+        LineBarVisualizer::class.java,
+        LineVisualizer::class.java,
+        SquareBarVisualizer::class.java
+    )
+    private var currentVisualizerIndex = 0
+    private var lastAudioSessionId = -1
 
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<FrameLayout>
     private lateinit var nowPlayingScreen: NowPlayingScreen
@@ -151,6 +173,22 @@ abstract class AbsSlidingMusicPanelActivity : AbsBaseActivity(),
         }
 
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+
+        // Initialize AdMob
+        val adRequest = AdRequest.Builder().build()
+        binding.adView?.loadAd(adRequest)
+
+        // Setup Visualizer
+        binding.cycleVisualizerButton?.setOnClickListener {
+            cycleVisualizer()
+        }
+        showCurrentVisualizer()
+
+        launchAndRepeatWithViewLifecycle {
+            playerViewModel.progressFlow.collect {
+                setupVisualizer()
+            }
+        }
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -174,6 +212,7 @@ abstract class AbsSlidingMusicPanelActivity : AbsBaseActivity(),
         if (bottomSheetBehavior.state == STATE_EXPANDED) {
             setMiniPlayerAlphaProgress(1f)
         }
+        setupVisualizer(force = true)
     }
 
     override fun onDestroy() {
@@ -323,6 +362,46 @@ abstract class AbsSlidingMusicPanelActivity : AbsBaseActivity(),
     }
 
     fun getBottomSheetBehavior() = bottomSheetBehavior
+
+    private fun cycleVisualizer() {
+        visualizers[visualizerClasses[currentVisualizerIndex]]?.visibility = View.GONE
+        currentVisualizerIndex = (currentVisualizerIndex + 1) % visualizerClasses.size
+        showCurrentVisualizer(true)
+    }
+
+    private fun showCurrentVisualizer(force: Boolean = false) {
+        if (binding.visualizerContainer == null) return
+        val visualizerClass = visualizerClasses[currentVisualizerIndex]
+        val visualizer = visualizers.getOrPut(visualizerClass) {
+            visualizerClass.getConstructor(Context::class.java).newInstance(this).apply {
+                layoutParams = FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.MATCH_PARENT
+                )
+                setColor(getColor(android.R.color.black))
+                binding.visualizerContainer?.addView(this)
+            }
+        }
+        visualizer.visibility = View.VISIBLE
+        setupVisualizer(force)
+    }
+
+    private fun setupVisualizer(force: Boolean = false) {
+        val audioSessionId = playerViewModel.audioSessionId
+        if (audioSessionId > 0) {
+            if (audioSessionId != lastAudioSessionId || force) {
+                try {
+                    visualizers.values.forEach { it.visibility = View.GONE }
+                    val currentVisualizer = visualizers[visualizerClasses[currentVisualizerIndex]]
+                    currentVisualizer?.setPlayer(audioSessionId)
+                    currentVisualizer?.visibility = View.VISIBLE
+                    lastAudioSessionId = audioSessionId
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
 
     protected open fun onPanelCollapsed() {
         setMiniPlayerAlphaProgress(0f)
@@ -510,6 +589,7 @@ abstract class AbsSlidingMusicPanelActivity : AbsBaseActivity(),
             setMiniPlayerAlphaProgress(slideOffset)
         }
     }
+
 
     companion object {
         private const val BOTTOM_SHEET_HIDDEN = "is_bottom_sheet_hidden"

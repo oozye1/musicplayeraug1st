@@ -13,7 +13,7 @@ plugins {
 
 dependencies {
     implementation(project(mapOf("path" to ":audiovisualizer")))
-    implementation("com.google.android.gms:play-services-ads:22.6.0")
+    implementation("com.google.android.gms:play-services-ads:23.0.0")
 }
 
 sealed class Version(
@@ -230,8 +230,6 @@ dependencies {
     implementation(libs.androidx.viewpager)
     implementation(libs.material.components)
 
-    implementation(libs.aboutlibraries)
-
     implementation(libs.m3color)
     implementation(libs.balloon)
     implementation(libs.fastscroll)
@@ -249,7 +247,10 @@ dependencies {
     implementation(libs.markdown.glide)
     implementation(libs.markdown.linkify)
 
-    implementation(libs.bundles.ktor)
+    implementation(libs.bundles.ktor) {
+        exclude(group = "io.ktor", module = "ktor-client-core")
+        exclude(group = "io.ktor", module = "ktor-client-logging")
+    }
 
     implementation(libs.koin.core)
     implementation(libs.koin.android)
@@ -260,4 +261,7 @@ dependencies {
 
     implementation(libs.taglib)
     implementation(libs.jaudiotagger)
+
+    // About Libraries
+    implementation(libs.aboutlibraries)
 }

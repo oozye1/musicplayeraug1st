@@ -29,7 +29,7 @@ import androidx.core.view.*
 import androidx.core.view.WindowInsetsCompat.Type
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.mardous.booming.R
-import com.mardous.booming.appContext
+import com.mardous.booming.extensions.appContext
 
 fun WindowInsetsCompat?.getBottomGesturesInsets(): Int {
     if (this == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return 0
@@ -47,7 +47,7 @@ fun WindowInsetsCompat?.getBottomGesturesInsets(): Int {
 
 fun WindowInsetsCompat?.getBottomInsets(): Int {
     return this?.getInsets(Type.systemBars())?.bottom
-        ?: appContext().getNavigationBarHeight()
+        ?: appContext.getNavigationBarHeight()
 }
 
 typealias InsetsConsumer = (View, WindowInsetsCompat) -> Unit

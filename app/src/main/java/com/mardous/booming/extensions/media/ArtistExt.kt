@@ -19,7 +19,7 @@ package com.mardous.booming.extensions.media
 
 import android.content.Context
 import com.mardous.booming.R
-import com.mardous.booming.appContext
+import com.mardous.booming.extensions.appContext
 import com.mardous.booming.extensions.plurals
 import com.mardous.booming.extensions.utilities.buildInfoString
 import com.mardous.booming.model.Artist
@@ -27,8 +27,8 @@ import java.util.regex.Pattern
 
 fun String.displayArtistName(): String =
     when {
-        isArtistNameUnknown() -> appContext().getString(R.string.unknown_artist)
-        isVariousArtists() -> appContext().getString(R.string.various_artists)
+        isArtistNameUnknown() -> appContext.getString(R.string.unknown_artist)
+        isVariousArtists() -> appContext.getString(R.string.various_artists)
         else -> this
     }
 
@@ -73,4 +73,10 @@ fun String.toAlbumArtistName(): String {
         return this.substring(0, goIndex).trim()
     }
     return this
+}
+
+fun String.isVariousArtists(): Boolean {
+    val variousArtists = appContext.getString(R.string.various_artists)
+    val pattern = Pattern.compile(Pattern.quote(variousArtists), Pattern.CASE_INSENSITIVE)
+    return pattern.matcher(this).find()
 }

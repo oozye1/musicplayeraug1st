@@ -3,7 +3,7 @@ package com.mardous.booming.repository
 import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
-import com.mardous.booming.appContext
+import com.mardous.booming.extensions.appContext
 import com.mardous.booming.database.LyricsDao
 import com.mardous.booming.database.toLyricsEntity
 import com.mardous.booming.extensions.files.getContentUri
@@ -131,7 +131,7 @@ class RealLyricsRepository(
             )
         }
 
-        if (allowDownload && appContext().isAllowedToDownloadMetadata()) {
+        if (allowDownload && appContext.isAllowedToDownloadMetadata()) {
             val downloaded = runCatching { lyricsDownloadService.getLyrics(song) }.getOrNull()
             if (downloaded?.isSynced == true) {
                 val syncedData = lrcLyricsParser.parse(downloaded.syncedLyrics!!)

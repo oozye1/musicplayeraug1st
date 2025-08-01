@@ -23,7 +23,7 @@ import androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode
 import androidx.preference.Preference
 import com.google.android.material.color.DynamicColors
 import com.mardous.booming.R
-import com.mardous.booming.appInstance
+import com.mardous.booming.extensions.appInstance
 import com.mardous.booming.extensions.hasR
 import com.mardous.booming.extensions.hasS
 import com.mardous.booming.preferences.ThemePreference
@@ -67,7 +67,7 @@ class AppearancePreferencesFragment : PreferencesScreenFragment() {
             isVisible = hasS()
             setOnPreferenceChangeListener { _, newValue ->
                 if (newValue as Boolean) {
-                    DynamicColors.applyToActivitiesIfAvailable(appInstance())
+                    DynamicColors.applyToActivitiesIfAvailable(appInstance)
                 }
                 requireActivity().recreate()
                 true

@@ -29,7 +29,7 @@ import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.signature.MediaStoreSignature
 import com.bumptech.glide.signature.ObjectKey
 import com.mardous.booming.R
-import com.mardous.booming.appContext
+import com.mardous.booming.extensions.appContext
 import com.mardous.booming.extensions.media.albumCoverUri
 import com.mardous.booming.extensions.resources.defaultFooterColor
 import com.mardous.booming.extensions.resources.getDrawableCompat
@@ -132,7 +132,7 @@ fun <T> RequestBuilder<T>.playlistOptions() = apply {
 }
 
 private fun getDrawable(@DrawableRes id: Int): Drawable? {
-    return appContext().getDrawableCompat(id)
+    return appContext.getDrawableCompat(id)
 }
 
 private fun createSignature(artist: Artist): Key {

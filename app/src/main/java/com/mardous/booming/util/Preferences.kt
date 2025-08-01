@@ -26,7 +26,7 @@ import androidx.viewpager.widget.ViewPager
 import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.navigation.NavigationBarView.LabelVisibility
 import com.mardous.booming.R
-import com.mardous.booming.appContext
+import com.mardous.booming.extensions.appContext
 import com.mardous.booming.extensions.files.getCanonicalPathSafe
 import com.mardous.booming.extensions.hasQ
 import com.mardous.booming.extensions.hasS
@@ -364,10 +364,10 @@ object Preferences : KoinComponent {
     val historyEnabled: Boolean
         get() = preferences.getBoolean(ENABLE_HISTORY, true)
 
-    fun getLastAddedCutoff(context: Context = appContext()): Cutoff =
+    fun getLastAddedCutoff(context: Context = appContext): Cutoff =
         getCutoff(context, LAST_ADDED_CUTOFF, true)
 
-    fun getHistoryCutoff(context: Context = appContext()): Cutoff =
+    fun getHistoryCutoff(context: Context = appContext): Cutoff =
         getCutoff(context, HISTORY_CUTOFF)
 
     private fun getCutoff(
@@ -493,9 +493,9 @@ object Preferences : KoinComponent {
     private inline fun <reified T : Enum<T>> SharedPreferences.enumValue(key: String, defaultValue: T): T =
         nullString(key)?.toEnum<T>() ?: defaultValue
 
-    private fun appBool(resid: Int): Boolean = appContext().resources.getBoolean(resid)
+    private fun appBool(resid: Int): Boolean = appContext.resources.getBoolean(resid)
 
-    private fun appStr(resid: Int): String = appContext().getString(resid)
+    private fun appStr(resid: Int): String = appContext.getString(resid)
 }
 
 interface GeneralTheme {
