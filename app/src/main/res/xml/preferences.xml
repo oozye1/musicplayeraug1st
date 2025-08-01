@@ -59,10 +59,4 @@
         app:icon="@drawable/ic_settings_applications_24dp"
         app:key="advanced"/>
 
-    <Preference
-        app:layout="@layout/layout_preference_material"
-        app:title="@string/about_title"
-        app:icon="@drawable/ic_info_24dp"
-        app:key="about"/>
-
 </androidx.preference.PreferenceScreen>
