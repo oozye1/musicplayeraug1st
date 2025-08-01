@@ -23,8 +23,11 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
+import android.util.Log
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -54,6 +57,11 @@ import com.mardous.booming.viewmodels.library.model.SuggestedResult
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
 import android.support.v4.media.session.PlaybackStateCompat
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import android.content.pm.PackageManager
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 
 /**
  * @author Christians M. A. (mardous)
@@ -76,6 +84,50 @@ class HomeFragment : AbsMainActivityFragment(R.layout.fragment_home),
     private val currentContent: SuggestedResult
         get() = libraryViewModel.getSuggestions().value ?: SuggestedResult.Idle
 
+    private val RECORD_AUDIO_REQUEST_CODE = 1001
+
+    private fun hasRecordAudioPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun requestRecordAudioPermission() {
+        ActivityCompat.requestPermissions(requireActivity(), arrayOf(android.Manifest.permission.RECORD_AUDIO), RECORD_AUDIO_REQUEST_CODE)
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == RECORD_AUDIO_REQUEST_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            setupVisualizer()
+        } else {
+            Toast.makeText(requireContext(), "RECORD_AUDIO permission is required for the visualizer", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun setupVisualizer() {
+        var lastSessionId = -1
+        lifecycleScope.launch {
+            playerViewModel.progressFlow.collectLatest {
+                val audioSessionId = playerViewModel.audioSessionId
+                Log.d("VisualizerDebug", "Collected progressFlow. audioSessionId: $audioSessionId, visualizer: $visualizer, isAdded: $isAdded, isResumed: $isResumed")
+                if (audioSessionId > 0 && visualizer != null && isAdded && isResumed) {
+                    try {
+                        visualizer?.release() // Release previous visualizer if any
+                        visualizer?.setPlayer(audioSessionId)
+                        Log.d("VisualizerDebug", "Visualizer set with sessionId: $audioSessionId")
+                        if (audioSessionId != lastSessionId) {
+                            Toast.makeText(requireContext(), "Visualizer set with sessionId: $audioSessionId", Toast.LENGTH_SHORT).show()
+                            lastSessionId = audioSessionId
+                        }
+                    } catch (e: Exception) {
+                        Log.e("VisualizerDebug", "Error setting visualizer: ${e.message}", e)
+                    }
+                } else {
+                    Log.w("VisualizerDebug", "audioSessionId not valid or visualizer not ready. audioSessionId: $audioSessionId, visualizer: $visualizer, isAdded: $isAdded, isResumed: $isResumed")
+                }
+            }
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val homeBinding = FragmentHomeBinding.bind(view)
@@ -87,6 +139,33 @@ class HomeFragment : AbsMainActivityFragment(R.layout.fragment_home),
         adView?.loadAd(adRequest)
 
         visualizer = view.findViewById(R.id.visualizer)
+        Log.d("VisualizerDebug", "Visualizer instance: $visualizer")
+
+        if (hasRecordAudioPermission()) {
+            setupVisualizer()
+        } else {
+            requestRecordAudioPermission()
+        }
+
+        // Fallback: Listen for playback state changes and retry setting sessionId if not valid
+        if (mediaControllerCallback == null) {
+            mediaControllerCallback = object : MediaController.Callback() {
+                override fun onPlaybackStateChanged(state: android.media.session.PlaybackState?) {
+                    val sessionId = playerViewModel.audioSessionId
+                    Log.d("VisualizerDebug", "Playback state changed. Retrying sessionId: $sessionId")
+                    if (sessionId > 0) {
+                        try {
+                            visualizer?.setPlayer(sessionId)
+                            Log.d("VisualizerDebug", "Visualizer set with sessionId (fallback): $sessionId")
+                            Toast.makeText(requireContext(), "Visualizer set (fallback): $sessionId", Toast.LENGTH_SHORT).show()
+                        } catch (e: Exception) {
+                            Log.e("VisualizerDebug", "Error setting visualizer (fallback): ${e.message}")
+                        }
+                    }
+                }
+            }
+            mainActivity.mediaController?.registerCallback(mediaControllerCallback!!)
+        }
 
         binding.appBarLayout.setupStatusBarForeground()
         setSupportActionBar(binding.toolbar)

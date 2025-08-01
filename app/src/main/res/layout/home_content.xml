@@ -21,8 +21,9 @@
     <com.chibde.visualizer.BarVisualizer
         android:id="@+id/visualizer"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        app:av_color="@color/md_theme_primary"
+        android:layout_height="100dp"
+        android:background="#FF0000"
+        app:av_color="@android:color/holo_red_dark"
         app:av_density="1"
         app:av_num_bars="20"
         app:av_type="bar" />
