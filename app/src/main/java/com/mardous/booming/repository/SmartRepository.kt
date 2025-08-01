@@ -37,6 +37,7 @@ interface SmartRepository {
     fun topPlayedSongs(): List<Song>
     fun topAlbums(): List<Album>
     fun topAlbumArtists(): List<Artist>
+    fun lastAddedSongs(): List<Song>
     fun recentSongs(): List<Song>
     fun recentSongs(query: String, contentType: ContentType): List<Song>
     fun recentAlbums(): List<Album>
@@ -71,6 +72,9 @@ class RealSmartRepository(
 
     override fun topAlbumArtists(): List<Artist> =
         artistRepository.splitIntoAlbumArtists(topAlbums())
+
+    override fun lastAddedSongs(): List<Song> =
+        songRepository.songs(makeLastAddedCursorForPlaylist(context))
 
     override fun recentSongs(): List<Song> =
         songRepository.songs(makeLastAddedCursor(null, ContentType.RecentSongs))
@@ -128,6 +132,16 @@ class RealSmartRepository(
 
     override suspend fun clearSongHistory() {
         historyDao.clearHistory()
+    }
+
+    private fun makeLastAddedCursorForPlaylist(context: Context): Cursor? {
+        val cutoff = Preferences.getLastAddedCutoff(context).interval
+        val queryDispatcher = MediaQueryDispatcher()
+            .setProjection(RealSongRepository.getBaseProjection())
+            .setSelection("${AudioColumns.DATE_ADDED}>?")
+            .setSelectionArguments(arrayOf(cutoff.toString()))
+            .setSortOrder("${AudioColumns.DATE_ADDED} DESC")
+        return songRepository.makeSongCursor(queryDispatcher)
     }
 
     private fun makeLastAddedCursor(query: String?, contentType: ContentType): Cursor? {

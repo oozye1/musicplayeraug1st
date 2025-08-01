@@ -29,7 +29,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.bumptech.glide.signature.ObjectKey
-import com.mardous.booming.appContext
+import com.mardous.booming.extensions.appContext
 import com.mardous.booming.extensions.resources.getResized
 import com.mardous.booming.extensions.resources.toJPG
 import com.mardous.booming.extensions.showToast
@@ -43,11 +43,11 @@ import java.io.File
 import java.util.Locale
 
 private val customImagesPreferences: SharedPreferences by lazy {
-    appContext().getSharedPreferences("custom_artist_images", Context.MODE_PRIVATE)
+    appContext.getSharedPreferences("custom_artist_images", Context.MODE_PRIVATE)
 }
 
 private val signaturesPreferences: SharedPreferences by lazy {
-    appContext().getSharedPreferences("artist_signatures", Context.MODE_PRIVATE)
+    appContext.getSharedPreferences("artist_signatures", Context.MODE_PRIVATE)
 }
 
 private fun Artist.getFileName(): String {
@@ -62,7 +62,7 @@ fun Artist.hasCustomImage(): Boolean {
 }
 
 fun Artist.setCustomImage(uri: Uri) {
-    Glide.with(appContext())
+    Glide.with(appContext)
         .asBitmap()
         .load(uri)
         .diskCacheStrategy(DiskCacheStrategy.NONE)
@@ -89,10 +89,10 @@ fun Artist.setCustomImage(uri: Uri) {
 
                             updateArtistSignature()
 
-                            appContext().contentResolver
+                            appContext.contentResolver
                                 .notifyChange(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, null) // trigger media store changed to force artist image reload
                         } else {
-                            appContext().showToast(result.exceptionOrNull()?.toString())
+                            appContext.showToast(result.exceptionOrNull()?.toString())
                         }
                     }
                 }
@@ -109,7 +109,7 @@ fun Artist.resetCustomImage() {
 
             updateArtistSignature()
 
-            appContext().contentResolver
+            appContext.contentResolver
                 .notifyChange(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI,
                     null) // trigger media store changed to force artist image reload
 
@@ -134,5 +134,3 @@ fun Artist.getSignatureRaw(): Long {
 fun Artist.getSignature(): ObjectKey {
     return ObjectKey(getSignatureRaw().toString())
 }
-
-

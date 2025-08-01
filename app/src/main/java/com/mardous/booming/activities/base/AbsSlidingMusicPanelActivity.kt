@@ -175,7 +175,6 @@ abstract class AbsSlidingMusicPanelActivity : AbsBaseActivity(),
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
         // Initialize AdMob
-        MobileAds.initialize(this) {}
         val adRequest = AdRequest.Builder().build()
         binding.adView?.loadAd(adRequest)
 
