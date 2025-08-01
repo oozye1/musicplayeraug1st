@@ -271,6 +271,7 @@ class HomeFragment : AbsMainActivityFragment(R.layout.fragment_home),
         }
     }
 
+
     override fun onPause() {
         super.onPause()
         binding.recyclerView.stopScroll()
