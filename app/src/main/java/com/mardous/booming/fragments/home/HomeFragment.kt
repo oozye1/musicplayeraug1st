@@ -37,8 +37,12 @@ import com.chibde.visualizer.BlazingColorVisualizer
 import com.chibde.visualizer.CircleBarVisualizer
 import com.chibde.visualizer.CircleVisualizer
 import com.chibde.visualizer.CustomBarVisualizer
+import com.chibde.visualizer.DotMatrixVisualizer
+import com.chibde.visualizer.FadingBlocksVisualizer
 import com.chibde.visualizer.LineBarVisualizer
 import com.chibde.visualizer.LineVisualizer
+import com.chibde.visualizer.RadialSunburstVisualizer
+import com.chibde.visualizer.SpikeVisualizer
 import com.chibde.visualizer.SquareBarVisualizer
 import com.chibde.visualizer.WaveVisualizer
 import com.mardous.booming.R
@@ -100,6 +104,10 @@ class HomeFragment : AbsMainActivityFragment(R.layout.fragment_home),
         BlazingColorVisualizer::class.java,
         CustomBarVisualizer::class.java,
         WaveVisualizer::class.java,
+        RadialSunburstVisualizer::class.java,
+        FadingBlocksVisualizer::class.java,
+        DotMatrixVisualizer::class.java,
+        SpikeVisualizer::class.java,
         BarVisualizer::class.java,
         CircleBarVisualizer::class.java,
         CircleVisualizer::class.java,
@@ -267,7 +275,7 @@ class HomeFragment : AbsMainActivityFragment(R.layout.fragment_home),
             findNavController().navigate(R.id.nav_search)
         }
         val hexColor = String.format("#%06X", 0xFFFFFF and primaryColor())
-        val appName = "Booming <font color=$hexColor>Music</font>".toHtml()
+        val appName = "Love <font color=$hexColor>Music</font>".toHtml()
         binding.appBarLayout.title = appName
     }
 
