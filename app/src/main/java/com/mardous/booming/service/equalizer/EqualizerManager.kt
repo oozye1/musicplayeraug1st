@@ -587,6 +587,7 @@ class EqualizerManager internal constructor(context: Context) {
         const val EFFECT_TYPE_BASS_BOOST = "0634f220-ddd4-11db-a0fc-0002a5d5c51b"
         const val EFFECT_TYPE_VIRTUALIZER = "37cc2c00-dddd-11db-8577-0002a5d5c51b"
         const val EFFECT_TYPE_LOUDNESS_ENHANCER = "fe3199be-aed0-413f-87bb-11260eb63cf1"
+
         const val EFFECT_TYPE_PRESET_REVERB = "47382d60-ddd8-11db-bf3a-0002a5d5c51b"
 
         /**

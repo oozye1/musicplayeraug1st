@@ -27,21 +27,27 @@ import android.util.Log
  */
 @Suppress("DEPRECATION")
 class EffectSet(sessionId: Int) {
+    init {
+        Log.d("EffectSet", "Initializing EffectSet with sessionId=$sessionId")
+        if (sessionId <= 0) {
+            Log.e("EffectSet", "Invalid audio session ID: $sessionId. Effects will not be initialized.")
+        }
+    }
 
     private var eqNumPresets: Short = -1
     private var eqNumBands: Short = -1
 
     val equalizer: Equalizer? =
-        createEffect("Equalizer") { Equalizer(1, sessionId) }
+        if (sessionId > 0) createEffect("Equalizer") { Equalizer(1, sessionId) } else null
 
     private val bassBoost: BassBoost? =
-        createEffect("BassBoost") { BassBoost(1, sessionId) }
+        if (sessionId > 0) createEffect("BassBoost") { BassBoost(1, sessionId) } else null
 
     private val virtualizer: Virtualizer? =
-        createEffect("Virtualizer") { Virtualizer(1, sessionId) }
+        if (sessionId > 0) createEffect("Virtualizer") { Virtualizer(1, sessionId) } else null
 
     private val loudnessEnhancer: LoudnessEnhancer? =
-        createEffect("LoudnessEnhancer") { LoudnessEnhancer(sessionId) }
+        if (sessionId > 0) createEffect("LoudnessEnhancer") { LoudnessEnhancer(sessionId) } else null
 
     private val presetReverb: PresetReverb? = null
 
@@ -166,4 +172,3 @@ class EffectSet(sessionId: Int) {
         loudnessEnhancer?.release()
     }
 }
-

@@ -44,11 +44,15 @@ class EqualizerSession(
             val sessionId = intent.getIntExtra(AudioEffect.EXTRA_AUDIO_SESSION, 0)
             if (action == ACTION_OPEN_EQUALIZER_SESSION) {
                 if (!mAudioSessions.containsKey(sessionId)) {
-                    val result = runCatching {
-                        mAudioSessions.put(sessionId, EffectSet(sessionId))
-                    }
-                    if (result.isFailure) {
-                        Log.e(TAG, "Failed to open EQ session.. EffectSet error ", result.exceptionOrNull())
+                    if (sessionId > 0) {
+                        val result = runCatching {
+                            mAudioSessions.put(sessionId, EffectSet(sessionId))
+                        }
+                        if (result.isFailure) {
+                            Log.e(TAG, "Failed to open EQ session.. EffectSet error ", result.exceptionOrNull())
+                        }
+                    } else {
+                        Log.e(TAG, "Skipping EffectSet creation: invalid sessionId=$sessionId")
                     }
                 }
             }

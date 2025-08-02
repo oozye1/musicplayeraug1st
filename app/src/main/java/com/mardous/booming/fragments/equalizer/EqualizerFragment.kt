@@ -100,7 +100,37 @@ class EqualizerFragment : AbsMainActivityFragment(R.layout.fragment_equalizer),
     override fun onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean) {
         when (buttonView) {
             binding.equalizerBands.presetSwitch -> {
-                viewModel.setEqualizerState(isChecked)
+                val showEqControls = isChecked
+                binding.equalizerBands.bandsContainer.visibility = if (showEqControls) View.VISIBLE else View.GONE
+                binding.equalizerBands.selectPreset.visibility = if (showEqControls) View.VISIBLE else View.GONE
+                binding.equalizerBands.savePreset.visibility = if (showEqControls) View.VISIBLE else View.GONE
+                binding.equalizerBands.preset.visibility = if (showEqControls) View.VISIBLE else View.GONE
+                binding.equalizerEffects.virtualizerLabel.visibility = if (showEqControls) View.VISIBLE else View.GONE
+                binding.equalizerEffects.virtualizerStrength.visibility = if (showEqControls) View.VISIBLE else View.GONE
+                binding.equalizerEffects.virtualizerStrengthDisplay.visibility = if (showEqControls) View.VISIBLE else View.GONE
+                binding.equalizerEffects.bassboostLabel.visibility = if (showEqControls) View.VISIBLE else View.GONE
+                binding.equalizerEffects.bassboostStrength.visibility = if (showEqControls) View.VISIBLE else View.GONE
+                binding.equalizerEffects.bassboostStrengthDisplay.visibility = if (showEqControls) View.VISIBLE else View.GONE
+                binding.equalizerEffects.loudnessGain.visibility = if (showEqControls) View.VISIBLE else View.GONE
+                binding.equalizerEffects.loudnessGainDisplay.visibility = if (showEqControls) View.VISIBLE else View.GONE
+                binding.equalizerEffects.reverb.visibility = if (showEqControls) View.VISIBLE else View.GONE
+                binding.equalizerEffects.loudnessEnhancerSwitch.visibility = if (showEqControls) View.VISIBLE else View.GONE
+                binding.equalizerEffects.reverbSwitch.visibility = if (showEqControls) View.VISIBLE else View.GONE
+                for (seekBar in mEqualizerSeekBar) {
+                    seekBar?.isEnabled = showEqControls
+                }
+                binding.equalizerBands.selectPreset.isEnabled = showEqControls
+                binding.equalizerBands.savePreset.isEnabled = showEqControls && viewModel.isCustomPresetSelected()
+                binding.equalizerEffects.virtualizerStrength.isEnabled = showEqControls && viewModel.virtualizerState.isSupported
+                binding.equalizerEffects.bassboostStrength.isEnabled = showEqControls && viewModel.bassBoostState.isSupported
+                if (viewModel.presetReverbState.isSupported) {
+                    binding.equalizerEffects.reverbSwitch.isEnabled = showEqControls
+                    binding.equalizerEffects.reverb.isEnabled = showEqControls && viewModel.presetReverbState.isUsable
+                }
+                if (viewModel.loudnessGainState.isSupported) {
+                    binding.equalizerEffects.loudnessEnhancerSwitch.isEnabled = showEqControls
+                    binding.equalizerEffects.loudnessGain.isEnabled = showEqControls && viewModel.loudnessGainState.isUsable
+                }
             }
 
             binding.equalizerEffects.loudnessEnhancerSwitch -> {
@@ -138,21 +168,43 @@ class EqualizerFragment : AbsMainActivityFragment(R.layout.fragment_equalizer),
                 }
 
                 val isUsable = state.isUsable
-                for (seekBar in mEqualizerSeekBar) {
-                    seekBar?.isEnabled = state.isUsable
-                }
 
-                binding.equalizerBands.selectPreset.isEnabled = isUsable
-                binding.equalizerBands.savePreset.isEnabled = isUsable && viewModel.isCustomPresetSelected()
-                binding.equalizerEffects.virtualizerStrength.isEnabled = isUsable && viewModel.virtualizerState.isSupported
-                binding.equalizerEffects.bassboostStrength.isEnabled = isUsable && viewModel.bassBoostState.isSupported
+                // Hide/show only the sliders and effects controls, not the switch
+                binding.equalizerBands.bandsContainer.visibility = if (isUsable) View.VISIBLE else View.GONE
+                binding.equalizerBands.selectPreset.visibility = if (isUsable) View.VISIBLE else View.GONE
+                binding.equalizerBands.savePreset.visibility = if (isUsable) View.VISIBLE else View.GONE
+                binding.equalizerBands.preset.visibility = if (isUsable) View.VISIBLE else View.GONE
+
+                // Use both isUsable and the EQ button state to control visibility
+                val eqIsOn = binding.equalizerBands.presetSwitch.isChecked
+                val showEqControls = isUsable && eqIsOn
+
+                binding.equalizerEffects.virtualizerLabel.visibility = if (showEqControls) View.VISIBLE else View.GONE
+                binding.equalizerEffects.virtualizerStrength.visibility = if (showEqControls) View.VISIBLE else View.GONE
+                binding.equalizerEffects.virtualizerStrengthDisplay.visibility = if (showEqControls) View.VISIBLE else View.GONE
+                binding.equalizerEffects.bassboostLabel.visibility = if (showEqControls) View.VISIBLE else View.GONE
+                binding.equalizerEffects.bassboostStrength.visibility = if (showEqControls) View.VISIBLE else View.GONE
+                binding.equalizerEffects.bassboostStrengthDisplay.visibility = if (showEqControls) View.VISIBLE else View.GONE
+                binding.equalizerEffects.loudnessGain.visibility = if (showEqControls) View.VISIBLE else View.GONE
+                binding.equalizerEffects.loudnessGainDisplay.visibility = if (showEqControls) View.VISIBLE else View.GONE
+                binding.equalizerEffects.reverb.visibility = if (showEqControls) View.VISIBLE else View.GONE
+                binding.equalizerEffects.loudnessEnhancerSwitch.visibility = if (showEqControls) View.VISIBLE else View.GONE
+                binding.equalizerEffects.reverbSwitch.visibility = if (showEqControls) View.VISIBLE else View.GONE
+
+                for (seekBar in mEqualizerSeekBar) {
+                    seekBar?.isEnabled = showEqControls
+                }
+                binding.equalizerBands.selectPreset.isEnabled = showEqControls
+                binding.equalizerBands.savePreset.isEnabled = showEqControls && viewModel.isCustomPresetSelected()
+                binding.equalizerEffects.virtualizerStrength.isEnabled = showEqControls && viewModel.virtualizerState.isSupported
+                binding.equalizerEffects.bassboostStrength.isEnabled = showEqControls && viewModel.bassBoostState.isSupported
                 if (viewModel.presetReverbState.isSupported) {
-                    binding.equalizerEffects.reverbSwitch.isEnabled = isUsable
-                    binding.equalizerEffects.reverb.isEnabled = isUsable && viewModel.presetReverbState.isUsable
+                    binding.equalizerEffects.reverbSwitch.isEnabled = showEqControls
+                    binding.equalizerEffects.reverb.isEnabled = showEqControls && viewModel.presetReverbState.isUsable
                 }
                 if (viewModel.loudnessGainState.isSupported) {
-                    binding.equalizerEffects.loudnessEnhancerSwitch.isEnabled = isUsable
-                    binding.equalizerEffects.loudnessGain.isEnabled = isUsable && viewModel.loudnessGainState.isUsable
+                    binding.equalizerEffects.loudnessEnhancerSwitch.isEnabled = showEqControls
+                    binding.equalizerEffects.loudnessGain.isEnabled = showEqControls && viewModel.loudnessGainState.isUsable
                 }
             }
         }

@@ -41,6 +41,7 @@ import com.chibde.visualizer.CustomBarVisualizer
 import com.chibde.visualizer.DotMatrixVisualizer
 import com.chibde.visualizer.FadingBlocksVisualizer
 import com.chibde.visualizer.FountainVisualizer
+import com.chibde.visualizer.GradientBlocksVisualizer
 import com.chibde.visualizer.LineBarVisualizer
 import com.chibde.visualizer.LineVisualizer
 import com.chibde.visualizer.RadialSunburstVisualizer
@@ -129,6 +130,7 @@ class HomeFragment : AbsMainActivityFragment(R.layout.fragment_home),
         WaveVisualizer::class.java,
         RadialSunburstVisualizer::class.java,
         FadingBlocksVisualizer::class.java,
+        GradientBlocksVisualizer::class.java,
         DotMatrixVisualizer::class.java,
         FountainVisualizer::class.java,
         SpikeVisualizer::class.java,
