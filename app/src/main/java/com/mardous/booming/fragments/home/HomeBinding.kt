@@ -31,4 +31,6 @@ class HomeBinding(homeBinding: FragmentHomeBinding) {
     val recyclerView = homeBinding.homeContent.recyclerView
     val progressIndicator = homeBinding.homeContent.progressIndicator
     val empty = homeBinding.homeContent.empty
+    val equalizerBands = homeBinding.homeContent.equalizerContainer.equalizerBands
+    val equalizerEffects = homeBinding.homeContent.equalizerContainer.equalizerEffects
 }

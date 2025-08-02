@@ -38,6 +38,8 @@
             android:contentDescription="@string/cycle_visualizer" />
     </FrameLayout>
 
+    <include android:id="@+id/equalizer_container" layout="@layout/equalizer_content" />
+
     <include
         android:id="@+id/abs_playlists"
         layout="@layout/abs_playlists"/>
