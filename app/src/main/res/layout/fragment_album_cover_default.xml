@@ -20,4 +20,13 @@
         tools:ignore="ContentDescription,UnusedAttribute"
         tools:srcCompat="@tools:sample/backgrounds/scenic" />
 
+    <FrameLayout
+        android:id="@+id/visualizerContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="@id/player_image"
+        app:layout_constraintBottom_toBottomOf="@id/player_image"
+        app:layout_constraintStart_toStartOf="@id/player_image"
+        app:layout_constraintEnd_toEndOf="@id/player_image" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

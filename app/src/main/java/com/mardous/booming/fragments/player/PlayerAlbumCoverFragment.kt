@@ -17,19 +17,27 @@
 
 package com.mardous.booming.fragments.player
 
+import android.Manifest
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.*
+import android.widget.FrameLayout
+import android.util.Log
 import androidx.core.animation.doOnEnd
 import androidx.core.animation.doOnStart
+import androidx.core.content.ContextCompat
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
+import com.chibde.BaseVisualizer
+import com.chibde.visualizer.BlazingColorVisualizer
 import com.mardous.booming.R
 import com.mardous.booming.adapters.pager.AlbumCoverPagerAdapter
 import com.mardous.booming.databinding.FragmentPlayerAlbumCoverBinding
@@ -46,6 +54,8 @@ import com.mardous.booming.util.LEFT_RIGHT_SWIPING
 import com.mardous.booming.util.LYRICS_ON_COVER
 import com.mardous.booming.util.Preferences
 import com.mardous.booming.viewmodels.player.PlayerViewModel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
 class PlayerAlbumCoverFragment : Fragment(), ViewPager.OnPageChangeListener,
@@ -74,6 +84,53 @@ class PlayerAlbumCoverFragment : Fragment(), ViewPager.OnPageChangeListener,
     private var callbacks: Callbacks? = null
 
     private var currentPosition = 0
+
+    // Visualizer variables (using BlazingColorVisualizer for rainbow-like gradient effects)
+    private var blazingVisualizer: BlazingColorVisualizer? = null
+    private var visualizerContainer: FrameLayout? = null
+    private var lastAudioSessionId = -1
+
+    private fun hasRecordAudioPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun setupRainbowBarVisualizer() {
+        val audioSessionId = playerViewModel.audioSessionId
+        Log.d("VisualizerDebug", "Setup blazing color visualizer. audioSessionId: $audioSessionId, isAdded: $isAdded, isResumed: $isResumed")
+
+        // Find the visualizer container in the current album cover page
+        if (visualizerContainer == null) {
+            val currentFragment = childFragmentManager.fragments.find { it.isVisible }
+            visualizerContainer = currentFragment?.view?.findViewById(R.id.visualizerContainer)
+                ?: view?.findViewById(R.id.visualizerContainer)
+        }
+
+        if (audioSessionId > 0 && isAdded && isResumed && hasRecordAudioPermission()) {
+            if (audioSessionId != lastAudioSessionId) {
+                try {
+                    // Create BlazingColorVisualizer if it doesn't exist
+                    if (blazingVisualizer == null && visualizerContainer != null) {
+                        blazingVisualizer = BlazingColorVisualizer(requireContext()).apply {
+                            layoutParams = FrameLayout.LayoutParams(
+                                FrameLayout.LayoutParams.MATCH_PARENT,
+                                FrameLayout.LayoutParams.MATCH_PARENT
+                            )
+                        }
+                        visualizerContainer?.addView(blazingVisualizer)
+                    }
+
+                    // Set up the visualizer with audio session (BlazingColorVisualizer has built-in gradient colors)
+                    blazingVisualizer?.setPlayer(audioSessionId)
+                    lastAudioSessionId = audioSessionId
+                    Log.d("VisualizerDebug", "BlazingColorVisualizer set with sessionId: $audioSessionId")
+                } catch (e: Exception) {
+                    Log.e("VisualizerDebug", "Error setting blazing color visualizer: ${e.message}", e)
+                }
+            }
+        } else {
+            Log.w("VisualizerDebug", "audioSessionId not valid or permissions missing. audioSessionId: $audioSessionId, isAdded: $isAdded, isResumed: $isResumed, hasPermission: ${hasRecordAudioPermission()}")
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -106,9 +163,23 @@ class PlayerAlbumCoverFragment : Fragment(), ViewPager.OnPageChangeListener,
         _binding = FragmentPlayerAlbumCoverBinding.bind(view)
         coverLyricsFragment =
             childFragmentManager.findFragmentById(R.id.coverLyricsFragment) as? CoverLyricsFragment
+
+        // Initialize visualizer container (will find it in the current album cover page)
+        initializeVisualizerContainer()
+
         setupPageTransformer()
         setupEventObserver()
         Preferences.registerOnSharedPreferenceChangeListener(this)
+    }
+
+    private fun initializeVisualizerContainer() {
+        // The visualizer container is in the individual album cover fragments, not the main fragment
+        // We'll set it up when pages are created
+        lifecycleScope.launch {
+            playerViewModel.progressFlow.collect {
+                setupRainbowBarVisualizer()
+            }
+        }
     }
 
     private fun setupPageTransformer() {
@@ -161,6 +232,7 @@ class PlayerAlbumCoverFragment : Fragment(), ViewPager.OnPageChangeListener,
             gestureDetector?.onTouchEvent(event) ?: false
         }
 
+        setupRainbowBarVisualizer() // Setup visualizer on start
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {

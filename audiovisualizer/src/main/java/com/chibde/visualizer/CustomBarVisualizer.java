@@ -26,25 +26,24 @@ import android.util.AttributeSet;
 import com.chibde.BaseVisualizer;
 
 /**
- * BlazingColorVisualizer creates a colorful bar visualizer with gradient effects
+ * CustomBarVisualizer creates a colorful bar visualizer with a fire-like gradient.
  * for the android {@link android.media.MediaPlayer}
  *
  * Created by gautam chibde on 29/10/17.
  */
-
-public class BlazingColorVisualizer extends BaseVisualizer {
+public class CustomBarVisualizer extends BaseVisualizer {
     private Shader shader;
 
-    public BlazingColorVisualizer(Context context) {
+    public CustomBarVisualizer(Context context) {
         super(context);
     }
 
-    public BlazingColorVisualizer(Context context,
+    public CustomBarVisualizer(Context context,
                                   @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public BlazingColorVisualizer(Context context,
+    public CustomBarVisualizer(Context context,
                                   @Nullable AttributeSet attrs,
                                   int defStyleAttr) {
         super(context, attrs, defStyleAttr);
@@ -59,17 +58,13 @@ public class BlazingColorVisualizer extends BaseVisualizer {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         if (h > 0) {
-            // Create a rainbow gradient
-            int[] rainbow = {
+            // Create a fire-like gradient
+            int[] fireGradient = {
                     Color.RED,
                     Color.YELLOW,
-                    Color.GREEN,
-                    Color.CYAN,
-                    Color.BLUE,
-                    Color.MAGENTA,
                     Color.RED
             };
-            shader = new LinearGradient(0, 0, 0, h, rainbow, null, Shader.TileMode.MIRROR);
+            shader = new LinearGradient(0, 0, 0, h, fireGradient, null, Shader.TileMode.MIRROR);
         }
     }
 
@@ -86,3 +81,4 @@ public class BlazingColorVisualizer extends BaseVisualizer {
         }
     }
 }
+

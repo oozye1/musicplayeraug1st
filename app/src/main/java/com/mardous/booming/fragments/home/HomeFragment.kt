@@ -33,11 +33,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.chibde.BaseVisualizer
 import com.chibde.visualizer.BarVisualizer
+import com.chibde.visualizer.BlazingColorVisualizer
 import com.chibde.visualizer.CircleBarVisualizer
 import com.chibde.visualizer.CircleVisualizer
+import com.chibde.visualizer.CustomBarVisualizer
 import com.chibde.visualizer.LineBarVisualizer
 import com.chibde.visualizer.LineVisualizer
 import com.chibde.visualizer.SquareBarVisualizer
+import com.chibde.visualizer.WaveVisualizer
 import com.mardous.booming.R
 import com.mardous.booming.adapters.HomeAdapter
 import com.mardous.booming.adapters.album.AlbumAdapter
@@ -94,6 +97,9 @@ class HomeFragment : AbsMainActivityFragment(R.layout.fragment_home),
     private var mediaControllerCallback: MediaController.Callback? = null
 
     private val visualizerClasses = listOf(
+        BlazingColorVisualizer::class.java,
+        CustomBarVisualizer::class.java,
+        WaveVisualizer::class.java,
         BarVisualizer::class.java,
         CircleBarVisualizer::class.java,
         CircleVisualizer::class.java,
