@@ -216,7 +216,7 @@ fun AboutHeader(
                 .padding(bottom = 16.dp)
         ) {
             Image(
-                painter = painterResource(id = R.drawable.icon_web),
+                painter = painterResource(id = R.drawable.ic_launcher_foreground),
                 contentDescription = null,
                 modifier = Modifier.size(80.dp),
                 contentScale = ContentScale.Inside

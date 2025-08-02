@@ -19,6 +19,7 @@ package com.mardous.booming.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -49,6 +50,7 @@ class MainActivity : AbsSlidingMusicPanelActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("SplashDebug", "MainActivity started. Splash screen should be finished.")
         title = null
 
         updateTabs()
