@@ -34,11 +34,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.chibde.BaseVisualizer
 import com.chibde.visualizer.BarVisualizer
 import com.chibde.visualizer.BlazingColorVisualizer
+import com.chibde.visualizer.BreathingCircleVisualizer
 import com.chibde.visualizer.CircleBarVisualizer
 import com.chibde.visualizer.CircleVisualizer
 import com.chibde.visualizer.CustomBarVisualizer
 import com.chibde.visualizer.DotMatrixVisualizer
 import com.chibde.visualizer.FadingBlocksVisualizer
+import com.chibde.visualizer.FountainVisualizer
 import com.chibde.visualizer.LineBarVisualizer
 import com.chibde.visualizer.LineVisualizer
 import com.chibde.visualizer.RadialSunburstVisualizer
@@ -107,7 +109,9 @@ class HomeFragment : AbsMainActivityFragment(R.layout.fragment_home),
         RadialSunburstVisualizer::class.java,
         FadingBlocksVisualizer::class.java,
         DotMatrixVisualizer::class.java,
+        FountainVisualizer::class.java,
         SpikeVisualizer::class.java,
+        BreathingCircleVisualizer::class.java,
         BarVisualizer::class.java,
         CircleBarVisualizer::class.java,
         CircleVisualizer::class.java,
